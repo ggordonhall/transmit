@@ -21,8 +21,7 @@ const extensionReloaderPlugin =
         entries: {
           // TODO: reload manifest on update
           contentScript: 'contentScript',
-          background: 'background',
-          extensionPage: ['popup', 'options'],
+          extensionPage: ['popup'],
         },
       })
     : () => {
@@ -54,10 +53,8 @@ module.exports = {
 
   entry: {
     manifest: './source/manifest.json',
-    background: './source/scripts/background.js',
     contentScript: './source/scripts/contentScript.js',
     popup: './source/scripts/popup.js',
-    options: './source/scripts/options.js',
   },
 
   output: {
@@ -150,13 +147,6 @@ module.exports = {
     // write css file(s) to build folder
     new MiniCssExtractPlugin({filename: 'css/[name].css'}),
     new HtmlWebpackPlugin({
-      template: 'source/options.html',
-      inject: 'body',
-      hash: true,
-      chunks: ['options'],
-      filename: 'options.html',
-    }),
-    new HtmlWebpackPlugin({
       template: 'source/popup.html',
       inject: 'body',
       hash: true,
@@ -195,7 +185,11 @@ module.exports = {
               {
                 format: 'zip',
                 source: path.join(__dirname, 'extension', targetBrowser),
-                destination: `${path.join(__dirname, 'extension', targetBrowser)}.${getExtensionFileType(targetBrowser)}`,
+                destination: `${path.join(
+                  __dirname,
+                  'extension',
+                  targetBrowser
+                )}.${getExtensionFileType(targetBrowser)}`,
                 options: {zlib: {level: 6}},
               },
             ],

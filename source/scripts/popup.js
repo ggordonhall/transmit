@@ -1,4 +1,3 @@
-import 'emoji-log';
 import browser from 'webextension-polyfill';
 
 import '../styles/popup.scss';

@@ -9,55 +9,20 @@ const URL = 'http://127.0.0.1:8000/trans/';
  * @param {Number} height The height of the rectangle
  * @param {Number} rounded The corner radius
  */
-CanvasRenderingContext2D.prototype.roundRect = function (
-  x,
-  y,
-  width,
-  height,
-  rounded
-) {
-  const halfRadians = (2 * Math.PI) / 2;
-  const quarterRadians = (2 * Math.PI) / 4;
-  // top left arc
-  this.arc(
-    rounded + x,
-    rounded + y,
-    rounded,
-    -quarterRadians,
-    halfRadians,
-    true
-  );
-  // line from top left to bottom left
-  this.lineTo(x, y + height - rounded);
-  // bottom left arc
-  this.arc(
-    rounded + x,
-    height - rounded + y,
-    rounded,
-    halfRadians,
-    quarterRadians,
-    true
-  );
-  // line from bottom left to bottom right
-  this.lineTo(x + width - rounded, y + height);
-  // bottom right arc
-  this.arc(
-    x + width - rounded,
-    y + height - rounded,
-    rounded,
-    quarterRadians,
-    0,
-    true
-  );
-  // line from bottom right to top right
-  this.lineTo(x + width, y + rounded);
-  // top right arc
-  this.arc(x + width - rounded, y + rounded, rounded, 0, -quarterRadians, true);
-  // line from top right to top left
-  this.lineTo(x + rounded, y);
-  // Fill rect
-  this.fill();
-};
+function roundRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  ctx.fill();
+}
 
 /**
  * Send captured canvas to server and perform OCR and translation.
@@ -90,7 +55,7 @@ async function sendCanvasToServer(canvas, lang) {
 function drawBox(ctx, left, top, width, height) {
   ctx.globalAlpha = 0.9;
   ctx.fillStyle = 'white';
-  ctx.roundRect(left, top, width, height, 4);
+  roundRect(ctx, left, top, width, height, 4);
   ctx.globalAlpha = 1.0;
 }
 
@@ -168,55 +133,55 @@ function drawTextBox(ctx, coords, translation) {
   writeText(ctx, translation, x, y, width, height);
 }
 
-const test = [
-  'Il est temps pour StatQuest !!!!',
-  // '«Modèle» est utilisé dans de nombreux contextes.',
-  // 'Maintenant que je suis un adut, le terme `` modèle a plus à voir avec les mathématiques et les statistiques',
-  // `quand j'étais enfant, un mannequin
-  // était un tay qui collait
-  // ensemble`,
-  // `Quand j'étais un peu plus âgé, un
-  // mannequin était quelqu'un qui
-  // portait des
-  // vêtements fantaisie.`,
-];
-const test_bounds = [
-  [
-    [102, 167],
-    [351, 168],
-    [351, 190],
-    [102, 189],
-  ],
-  // [
-  //   [58, 12],
-  //   [262, 13],
-  //   [262, 29],
-  //   [58, 28],
-  // ],
-  // [
-  //   [28, 45],
-  //   [288, 45],
-  //   [288, 56],
-  //   [28, 56],
-  // ],
-  // [
-  //   [28, 49],
-  //   [132, 50],
-  //   [132, 72],
-  //   [28, 71],
-  // ],
-  // [
-  //   [176, 49],
-  //   [275, 49],
-  //   [275, 80],
-  //   [176, 80],
-  // ],
-];
+// const test = [
+//   'Il est temps pour StatQuest !!!!',
+//   '«Modèle» est utilisé dans de nombreux contextes.',
+//   'Maintenant que je suis un adut, le terme `` modèle a plus à voir avec les mathématiques et les statistiques',
+//   `quand j'étais enfant, un mannequin
+//   était un tay qui collait
+//   ensemble`,
+//   `Quand j'étais un peu plus âgé, un
+//   mannequin était quelqu'un qui
+//   portait des
+//   vêtements fantaisie.`,
+// ];
+// const test_bounds = [
+//   [
+//     [102, 167],
+//     [351, 168],
+//     [351, 190],
+//     [102, 189],
+//   ],
+//   [
+//     [58, 12],
+//     [262, 13],
+//     [262, 29],
+//     [58, 28],
+//   ],
+//   [
+//     [28, 45],
+//     [288, 45],
+//     [288, 56],
+//     [28, 56],
+//   ],
+//   [
+//     [28, 49],
+//     [132, 50],
+//     [132, 72],
+//     [28, 71],
+//   ],
+//   [
+//     [176, 49],
+//     [275, 49],
+//     [275, 80],
+//     [176, 80],
+//   ],
+// ];
 
-const json = {
-  translation: test,
-  translation_bounds: test_bounds,
-};
+// const json = {
+//   translation: test,
+//   translation_bounds: test_bounds,
+// };
 
 /**
  * Take a screenshot of the video element, perform OCR and translate
@@ -228,7 +193,7 @@ const json = {
  */
 async function translate(inputCanvas, outputCanvas, targetLang) {
   try {
-    // const json = await sendCanvasToServer(inputCanvas, targetLang);
+    const json = await sendCanvasToServer(inputCanvas, targetLang);
     // Clear canvas ready for next scene
     const ctx = outputCanvas.getContext('2d');
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -264,67 +229,71 @@ function calcuateCanvasDims(video) {
   return {width, height};
 }
 
+/**
+ * Find the largest video element by area on the webpage.
+ * If there are no videos, return null.
+ * @return {VideoElement} largest video
+ */
+function getLargestVideo() {
+  const videoArr = document.querySelectorAll('video');
+  if (videoArr !== null) {
+    let video;
+    let max = -1;
+    for (let i = 0; i < videoArr.length; i++) {
+      const area = videoArr[i].offsetWidth * videoArr[i].offsetHeight;
+      if (area > max) {
+        max = area;
+        video = videoArr[i];
+      }
+    }
+    return video;
+  }
+  return null;
+}
+
 // Define elements for reassignment
-let TARGET_VIDEO;
-let TRANSLATE_CANVAS;
-let CAPTURED_FRAMES_DIV;
+let targetVideo;
+let translateCanvas;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.message === 'init__translate') {
-    TARGET_VIDEO = document.querySelector('video');
-    if (TARGET_VIDEO !== null) {
+    targetVideo = getLargestVideo();
+    if (targetVideo !== null) {
       console.log('Initialising video capture...');
-      CAPTURED_FRAMES_DIV = document.createElement('div');
-      TRANSLATE_CANVAS = document.createElement('canvas');
-      const targetVideoDims = calcuateCanvasDims(TARGET_VIDEO);
-      const targetVideoParent = TARGET_VIDEO.parentNode;
+      translateCanvas = document.createElement('canvas');
+      const targetVideoDims = calcuateCanvasDims(targetVideo);
+      const targetVideoParent = targetVideo.parentNode;
       // Make sure video is ready to play
-      if (TARGET_VIDEO.readyState > 2) {
-        TRANSLATE_CANVAS.width = targetVideoDims.width;
-        TRANSLATE_CANVAS.height = targetVideoDims.height;
-        TRANSLATE_CANVAS.style.zIndex = TARGET_VIDEO.style.zIndex + 1;
-        TRANSLATE_CANVAS.style.position = 'absolute';
-        TRANSLATE_CANVAS.style.pointerEvents = 'none';
-        targetVideoParent.insertBefore(TRANSLATE_CANVAS, TARGET_VIDEO);
+      if (targetVideo.readyState > 2) {
+        translateCanvas.width = targetVideoDims.width;
+        translateCanvas.height = targetVideoDims.height;
+        translateCanvas.style.zIndex = targetVideo.style.zIndex + 1;
+        translateCanvas.style.position = 'absolute';
+        translateCanvas.style.pointerEvents = 'none';
+        targetVideoParent.insertBefore(translateCanvas, targetVideo);
       }
     } else {
       console.log('No video element found!');
     }
   } else if (request.message === 'capture__translate') {
-    if (
-      TRANSLATE_CANVAS === null ||
-      CAPTURED_FRAMES_DIV === null ||
-      TARGET_VIDEO === null
-    ) {
+    if (translateCanvas === null || targetVideo === null) {
       console.log('Extension not initialised! Please wait and try again.');
     } else {
       const captureCanvas = document.createElement('canvas');
-      captureCanvas.width = TRANSLATE_CANVAS.width;
-      captureCanvas.height = TRANSLATE_CANVAS.height;
+      captureCanvas.width = translateCanvas.width;
+      captureCanvas.height = translateCanvas.height;
       captureCanvas
         .getContext('2d')
-        .drawImage(TARGET_VIDEO, 0, 0, TARGET_VIDEO.width, TARGET_VIDEO.height);
-      CAPTURED_FRAMES_DIV.appendChild(captureCanvas);
-      translate(
-        CAPTURED_FRAMES_DIV.lastChild,
-        TRANSLATE_CANVAS,
-        request.targetLang
-      );
+        .drawImage(targetVideo, 0, 0, targetVideo.width, targetVideo.height);
+      translate(captureCanvas, translateCanvas, request.targetLang);
     }
   } else if (request.message === 'clear__translate') {
-    if (
-      TRANSLATE_CANVAS === null ||
-      CAPTURED_FRAMES_DIV === null ||
-      TARGET_VIDEO === null
-    ) {
+    if (translateCanvas === null || targetVideo === null) {
       console.log('Extension not initialised! Please wait and try again.');
     } else {
-      TRANSLATE_CANVAS.getContext('2d').clearRect(
-        0,
-        0,
-        TRANSLATE_CANVAS.width,
-        TRANSLATE_CANVAS.height
-      );
+      translateCanvas
+        .getContext('2d')
+        .clearRect(0, 0, translateCanvas.width, translateCanvas.height);
     }
   } else {
     console.log('Message not recognised!');
