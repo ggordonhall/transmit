@@ -1,0 +1,11 @@
+
+Hope you enjoy your new logo, here are the people that
+made your beautiful logo happen :)
+font name: SpaceText-Bold
+font link: https://github.com/floriankarsten/space-text
+font author: Florian Karsten
+font author site: http://floriankarsten.com/
+
+
+{"bg":"#EC676F","icon":"#391B51","font":"#ffffff","slogan":"#ffffff"}
+      

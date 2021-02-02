@@ -3,13 +3,15 @@
 @import "base/variables";
 
 body {
-  color: $black;
-  background-color: $greyWhite;
+  color: #222;
+  font-weight: bold;
+  background: #EC676F;
 }
 
 #popup {
   min-width: 350px;
   padding: 30px 20px;
+  padding-top: 5px;
 
   h2 {
     font-size: 25px;
@@ -18,8 +20,8 @@ body {
 
   #options__button {
     width: 50%;
-    background: green;
-    color: white;
+    background: white;
+    color: #222;
     font-weight: 500;
     border-radius: 15px;
     padding: 5px 10px;
@@ -32,8 +34,8 @@ body {
 
  #target__language {
   width: 50%;
-  background: green;
-  color: white;
+  background: white;
+  color: #222;
   font-weight: 500;
   font-size: 12px;
   border-radius: 10px;
@@ -48,17 +50,19 @@ body {
   .links__holder {
     ul {
       display: flex;
-      margin-top: 1em;
+      margin-top: 0.5em;
       justify-content: space-around;
 
       li {
         button {
-          border-radius: 25px;
+          border-radius: 20px;
+          margin-right: 0.25em;
           font-size: 20px;
           font-weight: 600;
-          padding: 10px 17px;
-          background-color: rgba(0, 0, 255, 0.7);
-          color: white;
+          padding: 8px 17px;
+          opacity: 0.9;
+          background-color: white;
+          color: #222;
           cursor: pointer;
         }
       }

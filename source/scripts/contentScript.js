@@ -133,56 +133,6 @@ function drawTextBox(ctx, coords, translation) {
   writeText(ctx, translation, x, y, width, height);
 }
 
-// const test = [
-//   'Il est temps pour StatQuest !!!!',
-//   '«Modèle» est utilisé dans de nombreux contextes.',
-//   'Maintenant que je suis un adut, le terme `` modèle a plus à voir avec les mathématiques et les statistiques',
-//   `quand j'étais enfant, un mannequin
-//   était un tay qui collait
-//   ensemble`,
-//   `Quand j'étais un peu plus âgé, un
-//   mannequin était quelqu'un qui
-//   portait des
-//   vêtements fantaisie.`,
-// ];
-// const test_bounds = [
-//   [
-//     [102, 167],
-//     [351, 168],
-//     [351, 190],
-//     [102, 189],
-//   ],
-//   [
-//     [58, 12],
-//     [262, 13],
-//     [262, 29],
-//     [58, 28],
-//   ],
-//   [
-//     [28, 45],
-//     [288, 45],
-//     [288, 56],
-//     [28, 56],
-//   ],
-//   [
-//     [28, 49],
-//     [132, 50],
-//     [132, 72],
-//     [28, 71],
-//   ],
-//   [
-//     [176, 49],
-//     [275, 49],
-//     [275, 80],
-//     [176, 80],
-//   ],
-// ];
-
-// const json = {
-//   translation: test,
-//   translation_bounds: test_bounds,
-// };
-
 /**
  * Take a screenshot of the video element, perform OCR and translate
  * detected text. Then write the translated text (in a bounding box) to
@@ -207,29 +157,6 @@ async function translate(inputCanvas, outputCanvas, targetLang) {
 }
 
 /**
- * Calculate dims of video element
- * @param {VideoElement} video
- */
-function calcuateCanvasDims(video) {
-  if (!video.width) {
-    video.width = video.videoWidth;
-  }
-  if (!video.height) {
-    video.height = video.videoHeight;
-  }
-  let width;
-  let height;
-  if (video.videoWidth / video.videoHeight > video.width / video.height) {
-    width = video.width;
-    height = (video.videoHeight / video.videoWidth) * video.width;
-  } else {
-    width = (video.videoWidth / video.videoHeight) * video.height;
-    height = video.height;
-  }
-  return {width, height};
-}
-
-/**
  * Find the largest video element by area on the webpage.
  * If there are no videos, return null.
  * @return {VideoElement} largest video
@@ -251,7 +178,6 @@ function getLargestVideo() {
   return null;
 }
 
-// Define elements for reassignment
 let targetVideo;
 let translateCanvas;
 
@@ -261,12 +187,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (targetVideo !== null) {
       console.log('Initialising video capture...');
       translateCanvas = document.createElement('canvas');
-      const targetVideoDims = calcuateCanvasDims(targetVideo);
       const targetVideoParent = targetVideo.parentNode;
       // Make sure video is ready to play
       if (targetVideo.readyState > 2) {
-        translateCanvas.width = targetVideoDims.width;
-        translateCanvas.height = targetVideoDims.height;
+        translateCanvas.width = targetVideo.offsetWidth;
+        translateCanvas.height = targetVideo.offsetHeight;
         translateCanvas.style.zIndex = targetVideo.style.zIndex + 1;
         translateCanvas.style.position = 'absolute';
         translateCanvas.style.pointerEvents = 'none';
@@ -280,11 +205,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.log('Extension not initialised! Please wait and try again.');
     } else {
       const captureCanvas = document.createElement('canvas');
-      captureCanvas.width = translateCanvas.width;
-      captureCanvas.height = translateCanvas.height;
+      captureCanvas.width = targetVideo.offsetWidth;
+      captureCanvas.height = targetVideo.offsetHeight;
       captureCanvas
         .getContext('2d')
-        .drawImage(targetVideo, 0, 0, targetVideo.width, targetVideo.height);
+        .drawImage(
+          targetVideo,
+          0,
+          0,
+          targetVideo.offsetWidth,
+          targetVideo.offsetHeight
+        );
       translate(captureCanvas, translateCanvas, request.targetLang);
     }
   } else if (request.message === 'clear__translate') {
@@ -293,7 +224,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else {
       translateCanvas
         .getContext('2d')
-        .clearRect(0, 0, translateCanvas.width, translateCanvas.height);
+        .clearRect(
+          0,
+          0,
+          translateCanvas.offsetWidth,
+          translateCanvas.offsetHeight
+        );
     }
   } else {
     console.log('Message not recognised!');
