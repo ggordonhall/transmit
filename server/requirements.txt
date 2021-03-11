@@ -1,0 +1,7 @@
+google-cloud-vision
+google-cloud-translate
+six
+fastapi
+starlette
+pydantic
+uvicorn
