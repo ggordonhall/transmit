@@ -19,14 +19,6 @@ Then run the following:
 - `yarn run build:opera` to build opera extension
 - `yarn run build` builds and packs extensions all at once to extension/ directory
 
-### Development
-
-- `yarn install` to install dependencies.
-- To watch file changes in developement
-
-  - Chrome
-    - `yarn run dev:chrome`
-
 ### Production
 
 - `yarn run build` builds the extension for all the browsers to `extension/BROWSER` directory respectively.
