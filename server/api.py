@@ -19,8 +19,8 @@ app.add_middleware(
 
 
 def extract_b64(str_base64_img):
-    idx = str_base64_img.index(',')
-    return str_base64_img[idx + 1:]
+    idx = str_base64_img.index(",")
+    return str_base64_img[idx + 1 :]
 
 
 def decode_image(str_base64_img):
@@ -47,29 +47,30 @@ async def translate(img: Image):
     print(b64_img)
     print(img.target_lang)
     text, translation, bounds, detected_langs = detect_and_translate(
-        b64_img, img.target_lang)
+        b64_img, img.target_lang
+    )
     print(text)
     print(translation)
     print(bounds)
     print(detected_langs)
     return {
-        'detected_text': text,
-        'translation': translation,
-        'translation_bounds': bounds,
-        'detected_languages': detected_langs
+        "detected_text": text,
+        "translation": translation,
+        "translation_bounds": bounds,
+        "detected_languages": detected_langs,
     }
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import os
     from starlette.testclient import TestClient
 
-    with open('../translate/img/borda.jpg', 'rb') as img:
+    with open("<TEST_PATH>", "rb") as img:
         encoded = base64.b64encode(img.read()).decode()
 
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'My Project-1dee666402a8.json'
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "<YOUR CREDENTIALS HERE>"
 
     client = TestClient(app)
-    payload = {'target_lang': 'en', 'str_base64_img': encoded}
+    payload = {"target_lang": "en", "str_base64_img": encoded}
     resp = client.post("/trans", json=payload)
     print(resp.json())
